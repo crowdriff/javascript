@@ -31,6 +31,8 @@
 
   - If you have internal state and/or refs, prefer `class extends React.Component` over `React.createClass`. eslint: [`react/prefer-es6-class`](https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/prefer-es6-class.md) [`react/prefer-stateless-function`](https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/prefer-stateless-function.md)
 
+  - If you aren't dealing with complex data, prefer `class extends React.PureComponent` over `class extends React.Component`. PureComponent does performance analysis for you, and only renders when things change. However, it only does a shallow compare, so the component shouldn't have any objects or arrays as types. Children should be avoided unless they are connected to state via Redux
+
     ```jsx
     // bad
     const Listing = React.createClass({
@@ -47,9 +49,17 @@
         return <div>{this.state.hello}</div>;
       }
     }
+
+    // best
+    class Listing extends React.PureComponent {
+      // ...
+      render() {
+      return <div>{this.state.hello}</div>;
+      }
+    }
     ```
 
-    And if you don't have state or refs, prefer normal functions (not arrow functions) over classes:
+    And if you don't have state or refs, prefer normal functions (not arrow functions) over classes, but PureComponents:
 
     ```jsx
     // bad
@@ -96,7 +106,7 @@
     const reservationItem = <ReservationCard />;
     ```
 
-  - **Component Naming**: Use the filename as the component name. For example, `ReservationCard.jsx` should have a reference name of `ReservationCard`. However, for root components of a directory, use `index.jsx` as the filename and use the directory name as the component name:
+  - **Component Naming**: Use the filename as the component name. For example, `ReservationCard.jsx` should have a reference name of `ReservationCard`. However, for root components of a directory, use `index.js` as a way to access `ReservationCard.jsx` and use the directory name as the component name:
 
     ```jsx
     // bad
@@ -259,6 +269,7 @@
 
   - Omit the value of the prop when it is explicitly `true`. eslint: [`react/jsx-boolean-value`](https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/jsx-boolean-value.md)
 
+
     ```jsx
     // bad
     <Foo
@@ -272,6 +283,8 @@
     ```
 
   - Always include an `alt` prop on `<img>` tags. If the image is presentational, `alt` can be an empty string or the `<img>` must have `role="presentation"`. eslint: [`jsx-a11y/alt-text`](https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/master/docs/rules/alt-text.md)
+
+  #### 👴🏻 LEGACY ALERT 👵🏻 - Platform is still behind
 
     ```jsx
     // bad
@@ -301,6 +314,8 @@
 
   - Use only valid, non-abstract [ARIA roles](https://www.w3.org/TR/wai-aria/roles#role_definitions). eslint: [`jsx-a11y/aria-role`](https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/master/docs/rules/aria-role.md)
 
+  #### 👴🏻 LEGACY ALERT 👵🏻 - Platform is still behind
+
     ```jsx
     // bad - not an ARIA role
     <div role="datepicker" />
@@ -326,6 +341,8 @@
 
   - Avoid using an array index as `key` prop, prefer a unique ID. ([why?](https://medium.com/@robinpokorny/index-as-a-key-is-an-anti-pattern-e0349aece318))
 
+  #### 👴🏻 LEGACY ALERT 👵🏻 - Platform is still behind
+
   ```jsx
   // bad
   {todos.map((todo, index) =>
@@ -345,6 +362,8 @@
   ```
 
   - Always define explicit defaultProps for all non-required props.
+
+  #### 👴🏻 LEGACY ALERT 👵🏻 - Platform is still behind
 
   > Why? propTypes are a form of documentation, and providing defaultProps means the reader of your code doesn’t have to assume as much. In addition, it can mean that your code can omit certain type checks.
 
@@ -444,6 +463,58 @@
       baz="baz"
     />
     ```
+
+## Ternaries in JSX
+
+  - Ternaries are useful in JSX, they help us use simple conditional expressions to show or hide a button
+
+  ```jsx
+    <ItemCard
+      { this.props.canSave ?
+        <button>
+          Click me
+        </button>
+        :
+        <button className="disabled" disabled>
+          Can't click me
+        </button>
+      }
+    />
+  ```
+
+  - Instead of a null case, you can use the `&&` operator. IMPORTANT: the condition must be a contained boolean expression or you get the wrong thing rendered
+
+  ```jsx
+    // good
+    <ItemCard
+      { this.props.canSave &&
+        <button>
+          Click me
+        </button>
+      }
+    />
+
+    // bad
+    <ItemCard
+      { this.props.canSave || this.props.label &&
+        <button>
+          Click me
+        </button>
+      }
+    />
+
+    // okay fixed now
+    <ItemCard
+      { (this.props.canSave || this.props.label) &&
+        <button>
+          Click me
+        </button>
+      }
+    />
+  ```
+
+  #### DO NOT MAKE TERNARIES TOO LONG
+  - If they're getting too long, move some of the logic into a render method, or a new component
 
 ## Methods
 
